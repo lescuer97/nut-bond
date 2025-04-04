@@ -51,6 +51,7 @@
   let userMetadata: UserMetadata | undefined = $state();
 
   function getBondEvent() {
+    bondAmounts = {}
     const { type, data } = nip19.decode(user);
 
     if (type != "npub") {
@@ -87,6 +88,7 @@
           pubkeyOfUsersToSearch,
           wallet,
         );
+
         const currAmount = bondAmounts[parsedToken.unit ?? "sat"];
         if (!currAmount) {
           bondAmounts[parsedToken.unit ?? "sat"] = amount;
@@ -158,7 +160,18 @@
   {#if userMetadata}
     <div class="user-info">
       {#if userMetadata?.picture}
-        <img src={userMetadata?.picture} alt="profile" />
+        <div class="profile-container">
+          <img
+            class="profile-picture"
+            src={userMetadata?.picture}
+            alt="profile"
+          />
+      {#if Object.keys(bondAmounts).length > 0}
+          <div class="badge">
+            <img src="/cashu-150x150.png" alt="Badge Icon" />
+          </div>
+      {/if}
+        </div>
       {/if}
       {#if userMetadata?.name}
         <p class="name">{userMetadata.name}</p>
@@ -190,15 +203,16 @@
 
   .create-bond {
     display: flex;
-    min-width: 300px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-width: 450px;
     gap: 10px;
   }
   .create-bond textarea {
     width: 100%;
     height: 100px;
+    word-break: break-all;
   }
 
   .user-check {
@@ -206,8 +220,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-width: 450px;
     gap: 10px;
   }
+  .user-check input {
+    width: 100%;
+    height: 28px;
+    font-size: 20ppx;
+  }
+
   .user-info {
     display: flex;
     flex-direction: column;
@@ -217,13 +238,6 @@
     border: 1px solid white;
     padding: 10px;
   }
-  .user-info img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid white;
-  }
 
   .user-info .name {
     font-size: 24px;
@@ -232,5 +246,40 @@
   }
   .amount {
     font-size: 24px;
+  }
+
+  .profile-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 10px auto;
+  }
+
+  .profile-picture {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f7931a;
+  }
+
+  .badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #763cc3;
+    padding: 2px;
+    border: 3px solid #f7931a;
+    overflow: hidden;
+  }
+
+  .badge img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
   }
 </style>

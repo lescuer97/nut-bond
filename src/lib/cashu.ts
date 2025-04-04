@@ -8,7 +8,6 @@ import {
 import { hashToCurve, pointFromHex } from "@cashu/crypto/modules/common";
 import { parseSecret } from "@cashu/crypto/modules/common/NUT11";
 import type NDK from "@nostr-dev-kit/ndk";
-import { proofP2pk } from "@nostr-dev-kit/ndk";
 
 export function getProofsAmount(proofs: Proof[]): number {
   let amount = 0
@@ -20,6 +19,8 @@ export function getProofsAmount(proofs: Proof[]): number {
 
 const schnoorSigPrefix = "02" as const;
 
+// swap tokens to a locked proofs with a locktime of 3 months. 
+// pubkey = h2c(nostrnpub)
 export async function swapTokensToLocked(ndk: NDK, wallet: CashuWallet, token: Token): Promise<Token> {
   await wallet.getKeySets();
   const amount = getProofsAmount(token.proofs);
@@ -49,10 +50,10 @@ export async function swapTokensToLocked(ndk: NDK, wallet: CashuWallet, token: T
   return swappedToken
 }
 
+// check proofs by timelock and if necesary return the proofs to check with the mint.
 export async function verifyProofP2PKAndLock(proofs: Proof[], nostrPubkey: string, wallet: CashuWallet): Promise<{ validProofs: Proof[], noTimelockProofs: Proof[] }> {
   var proofWithoutTimelock: Proof[] = []
   var validProofs: Proof[] = []
-
 
   for (let i = 0; i < proofs.length; i++) {
     const proof = proofs[i];
@@ -81,6 +82,7 @@ export async function verifyProofP2PKAndLock(proofs: Proof[], nostrPubkey: strin
 
     // get timelock
     let timelock: number | undefined = undefined
+
     secret[1].tags?.forEach((tag) => {
       if (tag[0] == "locktime") {
         timelock = Number(tag[1])
@@ -115,9 +117,6 @@ export async function verifyProofState(proofs: Proof[], wallet: CashuWallet): Pr
 
   return proofCopy
 }
-
-
-
 
 // check first if the proofs is timelock if the timelock passed check the state of the proof
 export async function getAmountFromValidTokens(token: Token, nostrPubkey: string, wallet: CashuWallet): Promise<number> {
