@@ -140,6 +140,9 @@
     });
     await event.publish();
   }
+
+
+  let is_locked_to_bond = $derived(Object.keys(bondAmounts).length > 0)
 </script>
 
 <main>
@@ -162,11 +165,11 @@
       {#if userMetadata?.picture}
         <div class="profile-container">
           <img
-            class="profile-picture"
+            class={`profile-picture ${is_locked_to_bond ? "locked-bond":""}`}
             src={userMetadata?.picture}
             alt="profile"
           />
-      {#if Object.keys(bondAmounts).length > 0}
+      {#if is_locked_to_bond}
           <div class="badge">
             <img src="/cashu-150x150.png" alt="Badge Icon" />
           </div>
@@ -180,7 +183,7 @@
         <p class="name">Display name: {userMetadata.display_name}</p>
       {/if}
 
-      {#if Object.keys(bondAmounts).length > 0}
+      {#if is_locked_to_bond}
         <h2>This Nostr account has:</h2>
         {#each Object.entries(bondAmounts) as [unit, value]}
           <div class="amount">
@@ -260,6 +263,10 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid white;
+  }
+
+  .locked-bond {
     border: 3px solid #f7931a;
   }
 
